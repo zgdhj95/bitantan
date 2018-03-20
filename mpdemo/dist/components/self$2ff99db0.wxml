@@ -1,0 +1,9 @@
+<import src="self$5ec209da" />
+<import src="self$394b0328" />
+<template name="self$2ff99db0">
+  <view class="_div data-v-d684e4e0 container">
+    <template data="{{...$root[$kk+'0'], $root}}" is="self$5ec209da"></template>
+    <template data="{{...$root[$kk+'1'], $root}}" is="self$394b0328"></template>
+    <view class="_div data-v-d684e4e0 item-delete"></view>
+  </view>
+</template>

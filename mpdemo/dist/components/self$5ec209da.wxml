@@ -1,0 +1,13 @@
+<template name="self$5ec209da">
+  <view class="_div data-v-9113c0aa self-header__container">
+    <input type="text" placeholder="请输入要查询的币种名称" class="_input data-v-9113c0aa search-input"
+    />
+    <view class="_div data-v-9113c0aa self-rmb" bindtap="handleProxy" data-eventid="{{'0'}}"
+      data-comkey="{{$k}}">
+      <image hidden="{{!(showRmb)}}" src="https://static.weixiaotong.com.cn/rmb-enabled.svg"
+        class="_img data-v-9113c0aa"></image>
+      <image hidden="{{!(!showRmb)}}" src="https://static.weixiaotong.com.cn/rmb-disabled.svg"
+        class="_img data-v-9113c0aa"></image>
+    </view>
+  </view>
+</template>

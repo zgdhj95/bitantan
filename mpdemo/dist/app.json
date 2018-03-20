@@ -1,0 +1,12 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/counter/counter"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1D3F59",
+    "navigationBarTitleText": "币知圈",
+    "navigationBarTextStyle": "white"
+  }
+}

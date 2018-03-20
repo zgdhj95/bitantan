@@ -1,0 +1,23 @@
+<template name="self$394b0328">
+  <view class="_div data-v-775b2480 self-body__container">
+    <view class="_ul data-v-775b2480">
+      <view class="_li data-v-775b2480 self-item__container" wx:for="{{coinList}}"
+        wx:for-index="index" wx:for-item="coin">
+        <view class="_div data-v-775b2480 item-left">
+          <view class="_div data-v-775b2480 market">
+            <image class="_img data-v-775b2480 market-icon" src="{{'https://static.weixiaotong.com.cn/explorer-static/' + coin.marketName + '.png'}}"></image>
+          </view>
+          <view class="_div data-v-775b2480 coin-name-unit">
+            <label class="_span data-v-775b2480 coin-name"> {{coin.coinName}}
+            </label>
+            <label class="_span data-v-775b2480 coin-unit">{{coin.coinUnit}}</label>
+          </view>
+        </view>
+        <label class="_span data-v-775b2480 {{'coin-price' + ' '+ coin.result}}">{{coin.price}}</label>
+        <view class="_div data-v-775b2480 {{'coin-pricerate'+ ' ' + ' rate' + coin.result}}">
+          <label class="_span data-v-775b2480">{{coin.priceRate}}</label>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
