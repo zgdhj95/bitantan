@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>huobi</name>
+	<name>chainself</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -12,7 +12,7 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments> 
+			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
@@ -38,7 +38,7 @@
 		<link>
 			<name>webapp</name>
 			<type>2</type>
-			<location>F:/Users/hbz/workspace/sstest/a/src/main/webapp</location>
+			<location>/Applications/Eclipse.app/Contents/MacOS/F::/Users/hbz/workspace/sstest/a/src/main/webapp</location>
 		</link>
 	</linkedResources>
 </projectDescription>

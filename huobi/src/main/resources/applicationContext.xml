@@ -19,34 +19,24 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd 
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/task  
-		http://www.springframework.org/schema/task/spring-task-3.1.xsd" default-lazy-init="true">
+		http://www.springframework.org/schema/task/spring-task-3.2.xsd" default-lazy-init="true"> 
+	<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
+	<context:component-scan base-package="com.chainself">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan> 
 
-	<description>Spring公共配置 </description>
-	<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->    
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" >  
-	<property name="messageConverters">   
-	         <list>   
-	             <bean class = "org.springframework.http.converter.StringHttpMessageConverter">   
-	                <property name = "supportedMediaTypes">
-	                      <list>
-	                          <value>text/html;charset=UTF-8</value>   
-	                     </list>   
-	                </property>   
-	             </bean>   
-	         </list>   
-	   </property>  
-	</bean>  
 
+	 <!-- 启用Aop AspectJ注解 -->
+    <aop:aspectj-autoproxy/>
+        
+         
+	<!--  MySQL 数据源相关配置 -->
 	<!-- Jpa Entity Manager 配置 -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"> 
-		<property name="dataSource" ref="dataSource"/>
+		<property name="dataSource" ref="dataSourceMysql"/>
 		<property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
-		<property name="packagesToScan" value="com.space.wechat"/>
-		
-	<!-- 	<property name="persistenceUnitName" value="defaultPU"/>
-		<property name="jpaVendorAdapter" ref="eclipseJpaVendorAdapter"/>
-		<property name="persistenceXmlLocation" value="classpath*:META-INF/persistence.xml" /> -->
-		
+		<property name="packagesToScan" value="com.chainself"/>
+		 
 		<property name="jpaProperties">
 			<props>
 				<!-- 命名规则 My_NAME->MyName -->
@@ -54,164 +44,74 @@
 				<prop key="hibernate.show_sql">false</prop>
 			</props>
 		</property>
-	</bean>
+	</bean> 
 	
 	<bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-		<property name="databasePlatform">
-			<bean factory-method="getDialect" class="org.springside.modules.persistence.Hibernates">
-				<constructor-arg ref="dataSource"/>
-			</bean>
-		</property>
+        <property name="database" value="MYSQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
 	</bean>
 
 	<!-- Spring Data Jpa配置 -->
- 	<jpa:repositories base-package="com.space.wechat"  transaction-manager-ref="transactionManager" entity-manager-factory-ref="entityManagerFactory"/>
+ 	<jpa:repositories base-package="com.chainself"  transaction-manager-ref="transactionManager" entity-manager-factory-ref="entityManagerFactory"/>
    
 	<!-- Jpa 事务配置 -->
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
-	
-	<!-- spring 上传文件配置 -->
-	<!-- <bean id="multipartResolver"
-		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-		set the max upload size100MB
-		<property name="maxUploadSize">
-			<value>104857600</value>
-		</property>
-		<property name="maxInMemorySize">
-			<value>4096</value>
-		</property>
-	</bean> -->
-	<!-- 重写了spring mvc自带的上传 -->
-     <bean id="multipartResolver" class="com.space.wechat.framework.MyCommonsMultipartResolver">
-        <property name="maxUploadSize" value="104857600"></property>
-        <property name="maxInMemorySize" value="4096"></property>
-        <property name="defaultEncoding" value="UTF-8"></property>         
-   </bean> 
-
+	  
 	<!-- 使用annotation定义事务 -->
 	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
-	
-		<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射,解决@ResponseBody乱码问题, 需要在annotation-driven和component-scan之前,否则乱码问题同样无法解决 -->
-	<!--Spring3.1推荐使用RequestMappingHandlerAdapter -->
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<bean class="org.springframework.http.converter.StringHttpMessageConverter">
-					<property name="supportedMediaTypes">
-						<list>
-							<value>text/html;charset=UTF-8</value>
-						</list>
-					</property>
-				</bean>
-			</list>
-		</property>
-	</bean>
-	
-	
-	<!-- 文本邮件服务类 -->
-	<bean id="simpleMailService" class="com.space.wechat.util.email.SimpleMailService">
-		<property name="mailSender" ref="mailSender" />
-	</bean> 
-	 
-
-	<!-- JSR303 Validator定义 -->
- 	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
- 	
-	<!-- 定时器 -->
- 	<task:annotation-driven/>
- 	
+ 
 	<!-- production环境 -->
  	<beans profile="production">
- 	
-	 	<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
-		<context:component-scan base-package="com.space.wechat">
-			<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-		</context:component-scan>
-	
+ 	 
  		<context:property-placeholder ignore-unresolvable="true"
-			location="classpath*:/application.properties" />	
-				 
- 
- 		<!-- 数据源配置, 使用DBCP数据库连接池 -->
-		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-			<!-- Connection Info -->
-			<property name="driverClassName" value="${jdbc.driver}" />
-			<property name="url" value="${jdbc.url}" />
-			<property name="username" value="${jdbc.username}" />
-			<property name="password" value="${jdbc.password}" />
-		
-			<!-- Connection Pooling Info -->
-			<property name="maxActive" value="${druid.maxActive}" /> 
-			<property name="maxIdle" value="${druid.maxIdle}" /> 
-			<property name="defaultAutoCommit" value="false" />
-			<!-- 连接Idle一个小时后超时 -->
-			<property name="timeBetweenEvictionRunsMillis" value="3600000" />
-			<property name="minEvictableIdleTimeMillis" value="3600000" />
-		</bean>
-		 
-		
-		<!-- 邮件发送器 -->
-		<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-			<!-- 配置greenmail simulatore中的默认值 -->
-			<property name="host" value="smtp.exmail.qq.com" />
-	       	<property name="port"><value>465</value></property>
-	       	<property name="protocol"><value>smtp</value></property>
-			<property name="username" value="${mail.username}" />
-			<property name="password" value="${mail.password}" />
-			<property name="defaultEncoding" value="UTF-8"/>
-			<property name="javaMailProperties">
-				<props>
-	            <prop key="mail.smtps.auth">true</prop>
-	            <prop key="mail.smtp.ssl.enable">true</prop>
-	            <prop key="mail.transport.protocol">smtps</prop>
-				</props>
-			</property>
-		</bean>
-		
-		<!-- 数据源配置,使用应用服务器的数据库连接池 -->
-		<!--<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/ExampleDB" />-->
-	</beans>
-	
- 
-	<!-- unit test环境 -->
-	<beans profile="test">
-	 	<context:property-placeholder ignore-resource-not-found="true"
-			location="classpath*:/application.test.properties" />
-			
-		<!-- 使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
-		<context:component-scan base-package="com.space.wechat.repository">
-		</context:component-scan>
-		
+			location="classpath*:/application.properties" />
+ 					
 		<!-- DBCP连接池 -->
-		<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource"> 
+		<bean id="dataSourceMysql" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
 		      <!-- 基本属性 url、user、password -->
-		      <property name="driverClass" value="${jdbc.driver}" />
-			  <property name="url" value="${jdbc.url}" />
-			  <property name="username" value="${jdbc.username}" />
-			  <property name="password" value="${jdbc.password}" />
-		</bean>
+		      <property name="driverClassName" value="${mysql.driver}" />
+			  <property name="url" value="${mysql.url}" />
+			  <property name="username" value="${mysql.username}" />
+			  <property name="password" value="${mysql.password}" />
+			  <property name="defaultAutoCommit" value="false" />
+			  
+			    <!-- 配置初始化大小、最小、最大 -->
+		      <property name="initialSize" value="${mysql.initialSize}" />
+			  <property name="maxActive" value="${mysql.maxActive}" /> 
+			  <property name="minIdle" value="${mysql.minIdle}" /> 
+			   
+		      <!-- 配置获取连接等待超时的时间 -->
+		      <property name="maxWait" value="60000" />
 		
-		<!-- 邮件发送器 -->
-		<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-			<!-- 配置greenmail simulatore中的默认值 -->
-			<property name="host" value="smtp.exmail.qq.com" />
-	       	<property name="port"><value>465</value></property>
-	       	<property name="protocol"><value>smtp</value></property>
-			<property name="username" value="service@weixiaotong.cn" />
-			<property name="password" value="password" />
-			<property name="defaultEncoding" value="UTF-8"/>
-			<property name="javaMailProperties">
-				<props>
-	            <prop key="mail.smtps.auth">true</prop>
-	            <prop key="mail.smtp.ssl.enable">true</prop>
-	            <prop key="mail.transport.protocol">smtps</prop>
-				</props>
-			</property>
+		      <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		      <property name="timeBetweenEvictionRunsMillis" value="60000" />
+		
+		      <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		      <property name="minEvictableIdleTimeMillis" value="300000" />
+		
+		      <property name="validationQuery" value="SELECT 'x'" />
+		      <property name="testWhileIdle" value="true" />
+		      <property name="testOnBorrow" value="false" />
+		      <property name="testOnReturn" value="false" />
+		
+		      <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		      <property name="poolPreparedStatements" value="true" />
+		      <property name="maxPoolPreparedStatementPerConnectionSize" value="100" />
+		
+		      <!-- 配置监控统计拦截的filters -->
+		      <property name="filters" value="stat" />
+		      
+		      <!-- 对于建立连接过长的连接强制关闭 -->
+			  <property name="removeAbandoned" value="true" /> 
+			  <!-- 如果连接建立时间超过了30分钟，则强制将其关闭   -->
+			  <property name="removeAbandonedTimeout" value="1800" /> 
+			  <!-- 将当前关闭动作记录到日志   -->
+			  <property name="logAbandoned" value="true" /> 
 		</bean>
 		 
-	</beans>
-	
-	
+		 
+	</beans> 
+	 
 </beans>
