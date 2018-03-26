@@ -20,10 +20,14 @@ public class PriceCache {
 			return;
 		}
 		JSONObject json = JSON.parseObject(mapStr);
+		System.out.println("initMap success, json.entrySet()=" + json.entrySet().size());
 		for (Entry<String, Object> jsonItem : json.entrySet()) {
 			String key = jsonItem.getKey();
+			System.out.print("initMapkey=" + key);
 			JSONObject jsonValue = (JSONObject) jsonItem.getValue();
+			System.out.println(" jsonValue=" + jsonValue);
 			priceMap.put(key, jsonValue);
 		}
+		System.out.println("initMap success, size=" + priceMap.size());
 	}
 }
