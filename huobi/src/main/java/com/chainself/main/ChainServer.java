@@ -71,6 +71,19 @@ public class ChainServer {
 		queryTimer.schedule(new QueryTimer(), 1000, 5000);
 	}
 
+	public static String clearZero(String price) {
+		int j = 0;
+		for (int i = price.length(); i > 0; i--) {
+			if (price.substring(i - 1, i).equals("0")) {
+				continue;
+			} else {
+				j = i;
+				break;
+			}
+		}
+		return price.substring(0, j);
+	}
+
 	public static void startSparkHttpServer() throws Exception {
 
 		int maxThreads = 10;
@@ -119,7 +132,8 @@ public class ChainServer {
 					result.put("coinUnit", uc.getPriceUnit());
 					result.put("coinName", uc.getChain());
 					result.put("marketName", uc.getMarket());
-					result.put("price", price.getString("close"));
+					result.put("price", clearZero(price.getString("close")));
+
 					result.put("marketTitle", uc.getMarket());
 					if (close < open) {
 						result.put("result", "price-down");
