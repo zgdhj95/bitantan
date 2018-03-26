@@ -126,10 +126,10 @@ public class ChainServer {
 					Double open = price.getDouble("open");
 					Double close = price.getDouble("close");
 					Double rate = (close - open) * 100 / close;
-					String rateStr = df.format(rate);
+					String rateStr = df.format(rate) + "%";
 					result.put("priceRate", rateStr);
 					result.put("icon", uc.getIcon());
-					result.put("coinUnit", uc.getPriceUnit());
+					result.put("coinUnit", uc.getPriceUnit().toUpperCase());
 					result.put("coinName", uc.getChain());
 					result.put("marketName", uc.getMarket());
 					result.put("price", clearZero(price.getString("close")));
