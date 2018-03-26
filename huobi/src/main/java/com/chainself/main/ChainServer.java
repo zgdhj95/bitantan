@@ -20,14 +20,20 @@ import static spark.Spark.get;
 import static spark.Spark.port;
 import static spark.Spark.threadPool;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.AbstractEnvironment;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.chainself.service.ChainService;
 import com.chainself.timer.QueryTimer;
+import com.chainself.util.CorsFilter;
 
 import io.itit.itf.okhttp.FastHttpClient;
 
@@ -37,16 +43,20 @@ import io.itit.itf.okhttp.FastHttpClient;
  */
 public class ChainServer {
 
+	public static DecimalFormat df = new DecimalFormat("#.00");
 	private static ApplicationContext context;
 
 	public static Object getService(String serviceName) {
 		return context.getBean(serviceName);
 	}
 
+	public static ChainService chainService = null;
+
 	public static void main(String[] args) throws Exception {
 
 		System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "production");
 		context = new ClassPathXmlApplicationContext("applicationContext.xml");
+		chainService = (ChainService) ChainServer.getService("chainService");
 		FastHttpClient.okHttpClient.dispatcher().setMaxRequestsPerHost(10);
 		startTimer();
 		startSparkHttpServer();
@@ -66,6 +76,7 @@ public class ChainServer {
 		int maxThreads = 10;
 		threadPool(maxThreads);
 		port(80);
+		new CorsFilter().apply();
 		get("/query", (req, res) -> {
 			String market = req.queryParams("market");
 			String chain = req.queryParams("chain");
@@ -88,6 +99,37 @@ public class ChainServer {
 				e.printStackTrace();
 			}
 			return "";
+		});
+
+		get("/querychainlist", (req, res) -> {
+
+			List<JSONObject> coinList = new ArrayList<JSONObject>();
+
+			ChainServer.chainService.findUserChainAll().stream().forEach(uc -> {
+				JSONObject price = PriceCache.getPrice(uc.getMarket(), uc.getChain(), uc.getPriceUnit());
+				if (price != null) {
+					String priceJson = price.toJSONString();
+					JSONObject result = JSON.parseObject(priceJson);
+					Double open = price.getDouble("open");
+					Double close = price.getDouble("close");
+					Double rate = (close - open) * 100 / close;
+					String rateStr = df.format(rate);
+					result.put("priceRate", rateStr);
+					result.put("icon", uc.getIcon());
+					result.put("coinUnit", uc.getPriceUnit());
+					result.put("coinName", uc.getChain());
+					result.put("marketName", uc.getMarket());
+					result.put("price", price.getString("close"));
+					result.put("marketTitle", uc.getMarket());
+					if (close < open) {
+						result.put("result", "price-down");
+					} else {
+						result.put("result", "price-up");
+					}
+					coinList.add(result);
+				}
+			});
+			return coinList;
 		});
 
 		// setPort(9998);
