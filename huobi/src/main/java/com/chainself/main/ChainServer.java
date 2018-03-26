@@ -65,7 +65,7 @@ public class ChainServer {
 
 		int maxThreads = 10;
 		threadPool(maxThreads);
-		port(80);
+		port(8320);
 		get("/query", (req, res) -> {
 			String market = req.queryParams("market");
 			String chain = req.queryParams("chain");
