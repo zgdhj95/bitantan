@@ -16,6 +16,10 @@ public class PriceCache {
 	}
 
 	public static void initMap(String mapStr) {
+		System.out.println("mapStr==" + mapStr);
+		if (mapStr == null || mapStr.isEmpty()) {
+			return;
+		}
 		JSONObject json = JSON.parseObject(mapStr);
 		for (Entry<String, Object> jsonItem : json.entrySet()) {
 			String key = jsonItem.getKey();
