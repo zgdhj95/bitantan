@@ -17,8 +17,8 @@ package com.chainself.main;
  */
 
 import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.setPort;
+import static spark.Spark.port;
+import static spark.Spark.threadPool;
 
 import java.util.Timer;
 
@@ -26,13 +26,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.AbstractEnvironment;
 
-import com.chainself.service.ChainService;
+import com.alibaba.fastjson.JSONObject;
 import com.chainself.timer.QueryTimer;
 
 import io.itit.itf.okhttp.FastHttpClient;
-import spark.Request;
-import spark.Response;
-import spark.Route;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request in a
@@ -65,32 +62,53 @@ public class ChainServer {
 	}
 
 	public static void startSparkHttpServer() throws Exception {
-		setPort(9998);
-		get(new Route("/iclock/cdata") {
-			@Override
-			public Object handle(Request request, Response response) {
-				if (request.queryParams("SN") == null || "".equals(request.queryParams("SN"))) {
-					return "";
-				}
-				try {
-					ChainService service = (ChainService) ChainServer.getService("chainService");
-					String result = 123 + request.queryParams("SN") + service.findAll().toJSONString();
-					return result;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+
+		int maxThreads = 10;
+		threadPool(maxThreads);
+		port(80);
+		get("/query", (req, res) -> {
+			String market = req.queryParams("market");
+			String chain = req.queryParams("chain");
+			String unit = req.queryParams("unit");
+			if (market == null || "".equals(market) || chain == null || "".equals(chain) || unit == null
+					|| "".equals(unit)) {
 				return "";
 			}
-		});
-
-		post(new Route("/iclock/cdata") {
-			@Override
-			public Object handle(Request request, Response response) {
-
-				String result = 999 + request.queryParams("SN");
-				return result;
+			String key = market + "_" + chain + unit;
+			System.out.println("query:" + key);
+			try {
+				JSONObject json = PriceCache.getPrice(market, chain, unit);
+				if (json != null) {
+					System.out.println("chain is:" + json.toJSONString());
+					return json.toJSONString();
+				} else {
+					return "chain not exists:" + key;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			return "";
 		});
+
+		// setPort(9998);
+		// get(new Route("/query") {
+		// @Override
+		// public Object handle(Request request, Response response) {
+		// if (request.queryParams("SN") == null ||
+		// "".equals(request.queryParams("SN"))) {
+		// return "";
+		// }
+		// try {
+		// ChainService service = (ChainService) ChainServer.getService("chainService");
+		// String result = 123 + request.queryParams("SN") +
+		// service.findAll().toJSONString();
+		// return result;
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// return "";
+		// }
+		// });
 	}
 
 }
