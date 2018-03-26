@@ -16,7 +16,7 @@ public class QueryTimer extends java.util.TimerTask {
 
 	@Override
 	public void run() {
-		FastHttpClient.get().url("http://123.207.241.107/queryall").build().executeAsync(new Callback() {
+		FastHttpClient.get().url("http://119.28.55.163/queryall").build().executeAsync(new Callback() {
 			@Override
 			public void onFailure(Call call, Exception e, long id) {
 				logger.error("get huobi error!", e);
