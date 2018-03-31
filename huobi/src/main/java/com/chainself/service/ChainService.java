@@ -55,7 +55,7 @@ public class ChainService {
 		for (Entry<String, JSONObject> entry : PriceCache.priceMap.entrySet()) {
 			String key = entry.getKey();
 			List<ChainPriceOpen> cpoList = mapCpo.get(key);
-			if (cpoList.isEmpty()) {
+			if (cpoList == null) {
 				ChainPriceOpen newCpo = new ChainPriceOpen();
 				newCpo.setChainkey(key);
 				newCpo.setPrice(entry.getValue().getString("close"));
