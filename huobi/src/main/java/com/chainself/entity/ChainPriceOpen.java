@@ -1,6 +1,8 @@
 package com.chainself.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -14,6 +16,7 @@ import javax.persistence.Table;
 @Table(name = "chain_price_open")
 public class ChainPriceOpen {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String chainkey;// 参数代码
 	private String price;
