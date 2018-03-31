@@ -84,6 +84,17 @@ public class ChainServer {
 		return price.substring(0, j);
 	}
 
+	/**
+	 * @param args
+	 */
+	public static double getDoubleOfObj(Object obj) {
+		try {
+			return new Double(obj.toString()).doubleValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 	public static void startSparkHttpServer() throws Exception {
 
 		int maxThreads = 10;
@@ -114,6 +125,11 @@ public class ChainServer {
 			return "";
 		});
 
+		get("/asset", (req, res) -> {
+			String userid = req.queryParams("userid");
+			return ChainServer.chainService.calcUserAsset(userid);
+		});
+
 		get("/querychainlist", (req, res) -> {
 
 			List<JSONObject> coinList = new ArrayList<JSONObject>();
@@ -123,9 +139,18 @@ public class ChainServer {
 				if (price != null) {
 					String priceJson = price.toJSONString();
 					JSONObject result = JSON.parseObject(priceJson);
+
 					Double open = price.getDouble("open");
+					if (open == null || open == 0d) {
+						String key = (uc.getMarket() + "_" + uc.getChain() + uc.getPriceUnit()).toLowerCase();
+						String priceOpen = PriceCache.priceMapOpen.get(key);
+						open = getDoubleOfObj(priceOpen);
+					}
 					Double close = price.getDouble("close");
-					Double rate = (close - open) * 100 / close;
+					Double rate = 100d;
+					if (open > 0d) {
+						rate = (close - open) * 100 / open;
+					}
 					String rateStr = df.format(rate) + "%";
 					result.put("priceRate", rateStr);
 					result.put("icon", uc.getIcon());
@@ -146,25 +171,6 @@ public class ChainServer {
 			return coinList;
 		});
 
-		// setPort(9998);
-		// get(new Route("/query") {
-		// @Override
-		// public Object handle(Request request, Response response) {
-		// if (request.queryParams("SN") == null ||
-		// "".equals(request.queryParams("SN"))) {
-		// return "";
-		// }
-		// try {
-		// ChainService service = (ChainService) ChainServer.getService("chainService");
-		// String result = 123 + request.queryParams("SN") +
-		// service.findAll().toJSONString();
-		// return result;
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// return "";
-		// }
-		// });
 	}
 
 }
