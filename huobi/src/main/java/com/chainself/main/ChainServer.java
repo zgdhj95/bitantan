@@ -140,12 +140,12 @@ public class ChainServer {
 					String priceJson = price.toJSONString();
 					JSONObject result = JSON.parseObject(priceJson);
 
-					Double open = price.getDouble("open");
-					if (open == null || open == 0d) {
-						String key = (uc.getMarket() + "_" + uc.getChain() + uc.getPriceUnit()).toLowerCase();
-						String priceOpen = PriceCache.priceMapOpen.get(key);
-						open = getDoubleOfObj(priceOpen);
-					}
+					// Double open = price.getDouble("open");
+					// if (open == null || open == 0d) {
+					String key = (uc.getMarket() + "_" + uc.getChain() + uc.getPriceUnit()).toLowerCase();
+					String priceOpen = PriceCache.priceMapOpen.get(key);
+					Double open = getDoubleOfObj(priceOpen);
+					// }
 					Double close = price.getDouble("close");
 					Double rate = 100d;
 					if (open > 0d) {
