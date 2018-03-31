@@ -82,19 +82,25 @@ public class ChainService {
 	}
 
 	public Double calcUserAsset(String userid) {
-		List<UserAsset> uaList = userAssetDao.findByUserid(userid);
-		if (uaList.isEmpty()) {
+		try {
+			List<UserAsset> uaList = userAssetDao.findByUserid(userid);
+			if (uaList.isEmpty()) {
+				return 0d;
+			} else {
+				return uaList.stream().collect(Collectors.summarizingDouble(ua -> {
+					if ("btc".equals(ua.getChain().toLowerCase())) {
+						return ua.getCount();
+					} else {
+						JSONObject priceJson = PriceCache.getPrice(ua.getMarket(), ua.getChain(), "btc");
+						Double price = priceJson.getDouble("close");
+						return price * ua.getCount();
+					}
+				})).getSum();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("query asset error userid=" + userid + " error=" + e.getMessage());
 			return 0d;
-		} else {
-			return uaList.stream().collect(Collectors.summarizingDouble(ua -> {
-				if ("btc".equals(ua.getChain().toLowerCase())) {
-					return ua.getCount();
-				} else {
-					JSONObject priceJson = PriceCache.getPrice(ua.getMarket(), ua.getChain(), "btc");
-					Double price = priceJson.getDouble("close");
-					return price * ua.getCount();
-				}
-			})).getSum();
 		}
 	}
 }
