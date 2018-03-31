@@ -46,6 +46,13 @@ public class ChainService {
 		return (List<UserChain>) userChainDao.findAll();
 	}
 
+	public void initPriceMapOpen() {
+		List<ChainPriceOpen> cpoList = ((List<ChainPriceOpen>) chainPriceOpenDao.findAll());
+		cpoList.stream().forEach(cpo -> {
+			PriceCache.priceMapOpen.put(cpo.getChainkey(), cpo.getPrice());
+		});
+	}
+
 	@Transactional(readOnly = false)
 	public void saveDayOpenPrice() {
 		Map<String, List<ChainPriceOpen>> mapCpo = ((List<ChainPriceOpen>) chainPriceOpenDao.findAll()).stream()
@@ -66,7 +73,6 @@ public class ChainService {
 				savedList.add(editCpo);
 			}
 		}
-		System.out.println("in saveDayOpenPrice savedList.size=" + savedList.size());
 		if (!savedList.isEmpty()) {
 			savedList.forEach(item -> {
 				PriceCache.priceMapOpen.put(item.getChainkey(), item.getPrice());
