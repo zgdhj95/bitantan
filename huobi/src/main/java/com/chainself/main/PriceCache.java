@@ -58,14 +58,12 @@ public class PriceCache {
 
 	private static boolean getIsDayOpen() {
 		boolean isDayOpen = false;
-		String todayStartStr = datesf.format(new Date()) + " 22:30:00";
+		String todayStartStr = datesf.format(new Date()) + " 00:00:00";
 		Long todayStart = parseDateTime(todayStartStr).getTime();
 		Long now = System.currentTimeMillis();
 		if ((now - todayStart < 5100) && (now - todayStart > 0)) {
 			isDayOpen = true;
 		}
-		System.out.println("todayStartStr=" + todayStartStr + " now - todayStart=" + (now - todayStart) + " isDayOpen="
-				+ isDayOpen);
 		return isDayOpen;
 	}
 }

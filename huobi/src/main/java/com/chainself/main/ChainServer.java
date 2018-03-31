@@ -89,6 +89,9 @@ public class ChainServer {
 	 */
 	public static double getDoubleOfObj(Object obj) {
 		try {
+			if (obj == null) {
+				return 0d;
+			}
 			return new Double(obj.toString()).doubleValue();
 		} catch (Exception e) {
 			return 0;
@@ -146,6 +149,10 @@ public class ChainServer {
 					String priceOpen = PriceCache.priceMapOpen.get(key);
 					Double open = getDoubleOfObj(priceOpen);
 					// }
+
+					if (priceOpen == null) {
+						open = price.getDouble("open");
+					}
 					Double close = price.getDouble("close");
 					Double rate = 100d;
 					if (open > 0d) {
