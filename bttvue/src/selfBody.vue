@@ -4,7 +4,7 @@
       <li class="self-item__container" v-for="coin in coinList" :key="coin">
         <div class="item-left">
           <div class="market">
-            <img class="market-icon" :src="'https://static.weixiaotong.com.cn/explorer-static/' + coin.marketName + '.png'"/>
+            <img class="market-icon" :src="coin.icon"/>
             <!-- <span>{{coin.marketTitle}}</span> -->
           </div>
           <div class="coin-name-unit">
