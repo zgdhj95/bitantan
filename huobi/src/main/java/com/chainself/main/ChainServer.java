@@ -103,7 +103,7 @@ public class ChainServer {
 
 		int maxThreads = 10;
 		threadPool(maxThreads);
-		port(80);
+		port(8080);
 		new CorsFilter().apply();
 		get("/query", (req, res) -> {
 			String market = req.queryParams("market");
