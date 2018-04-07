@@ -18,6 +18,10 @@ export default {
   flex-direction: column;
 }
 
+body {
+  background-color: #101419;
+}
+
 .container-row {
   display: flex;
   flex-direction: column;

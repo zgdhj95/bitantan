@@ -1,17 +1,6 @@
 <template>
   <div class="self-header__container">
-    <input type="text" placeholder="请输入要添加的币种名称" class="search-input" @focus="focusSearch"/>
-    <div class="delete-coin">
-      <img src="https://static.weixiaotong.com.cn/ico_delete.svg" />
-    </div>
-    <!-- <span class="self-title">自选行情</span>
-    <div class="delete-coin">
-      <img v-show="showRmb" class="switchicon" src="https://static.weixiaotong.com.cn/explorer-static/switchon.png" @click="toggleShowRmb"/>
-      <img v-show="!showRmb" class="switchicon" src="https://static.weixiaotong.com.cn/explorer-static/switchoff.png" @click="toggleShowRmb"/>
-      <span v-show="showRmb" class="rmb-on-text" @click="toggleShowRmb">人民币</span>
-      <span v-show="!showRmb" class="rmb-off-text" @click="toggleShowRmb">人民币</span>
-      <span class=""></span>
-    </div> -->
+    <input ref="searchinput" type="text" placeholder="请输入要添加的币种名称" class="search-input" @change="searchChain"/>
   </div>
 </template>
 
@@ -25,8 +14,6 @@ export default {
   methods: {
     focusSearch () {
       console.log('search focus')
-      const url = '../search/search'
-      wx.navigateTo({ url })
     }
   },
   created () {
@@ -38,7 +25,8 @@ export default {
 <style scoped>
 
   .search-input {
-      width: calc( 100% - 50px);
+      color: white;
+      width: 100%;
       border: 1rpx solid #384457;
       border-radius: 4px;
       padding: 3px 5px;

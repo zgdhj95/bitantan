@@ -77,7 +77,7 @@ export default {
 
 .item-delete {
   display: flex;
-  border-top: 1rpx #DADADA solid;
+  border-top: 1rpx #21232A solid;
   padding: 18px 0px;
   font-size: 18px;
   color: red;

@@ -1,12 +1,13 @@
 <template>
   <div class="container">
 
-    <self-page></self-page>
+    <self-page ></self-page>
   </div>
 </template>
 
 <script>
 import selfPage from '../self'
+import store from './store'
 
 export default {
   data () {
@@ -24,12 +25,26 @@ export default {
     getUserInfo () {
       // 调用登录接口
       wx.login({
-        success: () => {
-          wx.getUserInfo({
-            success: (res) => {
-              this.userInfo = res.userInfo
+        success: (res) => {
+          console.log(' res.cod=', res)
+          wx.request({
+            url: 'https://www.coinexplorer.cn/queryuser?code=' + res.code,
+            method: 'GET',
+            header: {
+              'Content-Type': 'json'
+            },
+            success: function (res) {
+              console.log(res.data)
+              store.commit('saveOpenid', res.data)
             }
           })
+          // wx.getUserInfo({
+          //   success: (res) => {
+          //     this.userInfo = res.userInfo
+          //     console.log('user is', res)
+          //     store.commit('saveUser', res.userInfo)
+          //   }
+          // })
         }
       })
     },

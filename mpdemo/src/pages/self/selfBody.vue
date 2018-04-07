@@ -4,16 +4,18 @@
       <li class="self-item__container" v-for="(coin, index) in coinList">
         <div class="item-left">
           <div class="market">
-            <img class="market-icon" :src="'https://static.weixiaotong.com.cn/explorer-static/' + coin.marketName + '.png'"/>
-            <!-- <span>{{coin.marketTitle}}</span> -->
+            <img class="market-icon" :src="coin.icon"/>
           </div>
           <div class="coin-name-unit">
-            <span class="coin-name"> {{coin.coinName}}
+            <span class="coin-name"> {{coin.coinName}}/{{coin.coinUnit}}
             </span>
-            <span class="coin-unit">{{coin.coinUnit}}</span>
+            <span class="coin-unit">{{coin.marketTitle}}</span>
           </div>
         </div>
-        <span :class="'coin-price ' + ' '+ coin.result">{{coin.price}}</span>
+        <div class="coin-price">
+          <span :class="'coin-price-rmb' + ' ' + coin.result">￥{{coin.priceRmb}}</span>
+          <span class="coin-price-real">{{coin.unitStr}}{{coin.price}}</span>
+        </div>
         <div :class="'coin-pricerate' + ' ' + ' rate' + coin.result">
           <span >{{coin.priceRate}}</span>
         </div>
@@ -23,84 +25,48 @@
 </template>
 
 <script>
+// import axios from 'axios'
+import store from '../index/store'
 export default {
   data () {
     return {
       showRmb: true,
-      coinList: [
-        {
-          marketTitle: '火币',
-          marketName: 'huobipro',
-          result: 'price-up',
-          price: '$ 1234.23',
-          priceRate: '-6.42%',
-          coinName: 'BTC',
-          coinUnit: 'USDT'
-        },
-        {
-          marketTitle: '币安',
-          marketName: 'binance',
-          result: 'price-down',
-          price: '฿ 1234.23',
-          priceRate: '-62.42%',
-          coinName: 'HSR',
-          coinUnit: 'USDT'
-        },
-        {
-          marketTitle: 'OKEX',
-          marketName: 'okex',
-          result: 'price-up',
-          price: 'E 0.000032',
-          priceRate: '11.42%',
-          coinName: 'QUTM',
-          coinUnit: 'ETH'
-        },
-        {
-          marketTitle: '中币',
-          marketName: 'zb',
-          result: 'price-down',
-          price: '￥ 321.23',
-          priceRate: '1.22%',
-          coinName: 'GNX',
-          coinUnit: 'USDT'
-        },
-        {
-          marketTitle: '币安',
-          marketName: 'binance',
-          result: 'price-down',
-          price: '฿ 0.00000098',
-          priceRate: '-6.42%',
-          coinName: 'AIDOC',
-          coinUnit: 'BTC'
-        },
-        {
-          marketTitle: '中币',
-          marketName: 'zb',
-          result: 'price-down',
-          price: '￥ 321.23',
-          priceRate: '1.22%',
-          coinName: 'MEE',
-          coinUnit: 'BTC'
-        },
-        {
-          marketTitle: '币安',
-          marketName: 'binance',
-          result: 'price-down',
-          price: '฿ 0.00000098',
-          priceRate: '-6.42%',
-          coinName: 'MDS',
-          coinUnit: 'BTC'
-        }
-      ]
+      coinList: []
     }
   },
   methods: {
-    toggleShowRmb () {
-      this.showRmb = !this.showRmb
+    calcRmbPrice (coin) {
+      let rmbPrice = 0
+      if (coin.coinUnit === 'USDT') {
+        rmbPrice = 6.4 * coin.price
+      } else if (coin.coinUnit === 'BTC') {
+        rmbPrice = 6.4 * 6865 * coin.price
+      }
+      console.log(' rmb price ==' + rmbPrice)
+      return rmbPrice
+    },
+    queryData () {
+      console.log('user is', store.state.userInfo)
+      var that = this
+      wx.request({
+        url: 'https://www.coinexplorer.cn/querychainlist',
+        method: 'GET',
+        header: {
+          'Content-Type': 'json'
+        },
+        success: function (res) {
+          console.log(res.data)
+          that.coinList = res.data
+        }
+      })
     }
   },
   created () {
-    // 调用应用实例的方法获取全局数据
+    this.queryData()
+    let self = this
+    setInterval(() => {
+      self.queryData()
+    }, 5000)
   }
 }
 </script>
@@ -118,20 +84,18 @@ export default {
     justify-content: space-between;
     height: 60px;
     align-items: center;
-    border-bottom: 1rpx solid #bababa;
   }
 
   .item-left {
     display: flex;
+    width: 140px;
   }
-
-
 
   .coin-name {
     margin-top: -3px;
     font-size: 16px;
     font-weight: 600;
-    color: #1D3F59;
+    color: #fff;
     padding-left: 5px;
   }
 
@@ -145,8 +109,17 @@ export default {
     font-size: 18px;
     font-weight: 700;
     padding-bottom: 5px;
-    width: calc( 100% -  200px);
+    width: calc( 100% -  240px);
     text-align: right;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .coin-price-real {
+    font-size: 12px;
+    color: #979797;
+    padding-left: 5px;
+    margin-top: -3px;
   }
 
   .coin-pricerate {
@@ -192,6 +165,10 @@ export default {
 
   .rateprice-down {
     background-color: #E36B42;
+  }
+
+  .coin-price-rmb {
+    margin-top: 5px;
   }
 
   .coin-name-unit {
