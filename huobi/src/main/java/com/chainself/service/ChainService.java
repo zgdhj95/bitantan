@@ -152,10 +152,10 @@ public class ChainService {
 	public String getWechatUser(String code) {
 
 		try {
-			Response response = FastHttpClient.get()
-					.url("https://api.weixin.qq.com/sns/jscode2session?appid=" + ConstantVar.APP_ID + "&secret="
-							+ ConstantVar.SECRET_KEY + "&js_code=" + code + "&grant_type=authorization_code")
-					.build().execute();
+			String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + ConstantVar.APP_ID + "&secret="
+					+ ConstantVar.SECRET_KEY + "&js_code=" + code + "&grant_type=authorization_code";
+			System.out.println("url is " + url);
+			Response response = FastHttpClient.get().url(url).build().execute();
 
 			String responseStr = response.body().string();
 			System.out.print("responseStr=" + responseStr);
