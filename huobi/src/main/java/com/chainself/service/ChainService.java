@@ -20,12 +20,18 @@ import com.chainself.dao.ChainUnitPriceDao;
 import com.chainself.dao.UsdtPriceDao;
 import com.chainself.dao.UserAssetDao;
 import com.chainself.dao.UserChainDao;
+import com.chainself.dao.UserDao;
 import com.chainself.entity.ChainPriceOpen;
 import com.chainself.entity.ChainUnitPrice;
 import com.chainself.entity.UsdtPrice;
+import com.chainself.entity.User;
 import com.chainself.entity.UserAsset;
 import com.chainself.entity.UserChain;
 import com.chainself.main.PriceCache;
+import com.chainself.util.ConstantVar;
+
+import io.itit.itf.okhttp.FastHttpClient;
+import io.itit.itf.okhttp.Response;
 
 @Component
 @Transactional(readOnly = true)
@@ -48,6 +54,9 @@ public class ChainService {
 
 	@Autowired
 	private ChainPriceOpenDao chainPriceOpenDao;
+
+	@Autowired
+	private UserDao userDao;
 
 	public JSONArray findChainAll() {
 		return (JSONArray) JSON.toJSON(chainDao.findAll());
@@ -137,5 +146,32 @@ public class ChainService {
 			System.out.println("query asset error userid=" + userid + " error=" + e.getMessage());
 			return 0d;
 		}
+	}
+
+	@Transactional(readOnly = false)
+	public String getWechatUser(String code) {
+
+		try {
+			Response response = FastHttpClient.get()
+					.url("https://api.weixin.qq.com/sns/jscode2session?appid=" + ConstantVar.APP_ID + "&secret="
+							+ ConstantVar.SECRET_KEY + "&js_code=" + code + "&grant_type=authorization_code")
+					.build().execute();
+
+			String responseStr = response.body().string();
+			System.out.print("responseStr=" + responseStr);
+			JSONObject openidJson = JSON.parseObject(responseStr);
+			String openid = openidJson.getString("openid");
+			if (userDao.findByOpenid(openid).isEmpty()) {
+				User user = new User();
+				user.setOpenid(openid);
+				userDao.save(user);
+			}
+			return openid;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }

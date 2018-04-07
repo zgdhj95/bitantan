@@ -143,6 +143,20 @@ public class ChainServer {
 			return "";
 		});
 
+		get("/queryuser", (req, res) -> {
+			JSONObject result = new JSONObject();
+			String code = req.queryParams("code");
+			String openid = ChainServer.chainService.getWechatUser(code);
+			if (openid == null) {
+				result.put("state", "error");
+			} else {
+
+				result.put("state", "success");
+				result.put("openid", openid);
+			}
+			return result;
+		});
+
 		get("/asset", (req, res) -> {
 			String userid = req.queryParams("userid");
 			return ChainServer.chainService.calcUserAsset(userid);
