@@ -99,6 +99,20 @@ public class ChainServer {
 		}
 	}
 
+	private static String getUnitStr(String unit) {
+		if ("btc".equals(unit)) {
+			return "฿";
+		} else if ("eth".equals(unit)) {
+			return "E";
+		} else if ("usdt".equals(unit)) {
+			return "$";
+		} else if ("bnb".equals(unit)) {
+			return "B";
+		} else {
+			return "";
+		}
+	}
+
 	public static void startSparkHttpServer() throws Exception {
 
 		int maxThreads = 10;
@@ -163,10 +177,13 @@ public class ChainServer {
 					result.put("priceRate", rateStr);
 					result.put("icon", uc.getIcon());
 					result.put("coinUnit", uc.getPriceUnit().toUpperCase());
+					result.put("coinUnitStr", uc.getPriceUnit().toUpperCase());
 					result.put("coinName", uc.getChain());
 					result.put("marketName", uc.getMarket());
 					result.put("price", clearZero(price.getString("close")));
-
+					result.put("unitStr", getUnitStr(uc.getPriceUnit().toLowerCase()));
+					Double closeRmb = price.getDouble("priceRmb");
+					result.put("priceRmb", String.format("%.2f", closeRmb));
 					result.put("marketTitle", uc.getMarket());
 					if (close < open) {
 						result.put("result", "price-down");

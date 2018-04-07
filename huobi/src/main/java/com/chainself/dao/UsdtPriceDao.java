@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.chainself.entity.UsdtPrice;
 
-public interface ChainDao extends CrudRepository<UsdtPrice, Long> {
+public interface UsdtPriceDao extends CrudRepository<UsdtPrice, Long> {
 
 }

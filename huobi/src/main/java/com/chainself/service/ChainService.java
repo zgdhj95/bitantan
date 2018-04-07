@@ -1,6 +1,7 @@
 package com.chainself.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,9 +16,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.chainself.dao.ChainDao;
 import com.chainself.dao.ChainPriceOpenDao;
+import com.chainself.dao.ChainUnitPriceDao;
+import com.chainself.dao.UsdtPriceDao;
 import com.chainself.dao.UserAssetDao;
 import com.chainself.dao.UserChainDao;
 import com.chainself.entity.ChainPriceOpen;
+import com.chainself.entity.ChainUnitPrice;
+import com.chainself.entity.UsdtPrice;
 import com.chainself.entity.UserAsset;
 import com.chainself.entity.UserChain;
 import com.chainself.main.PriceCache;
@@ -36,6 +41,12 @@ public class ChainService {
 	private UserAssetDao userAssetDao;
 
 	@Autowired
+	private UsdtPriceDao usdtPriceDao;
+
+	@Autowired
+	private ChainUnitPriceDao chainUnitPriceDao;
+
+	@Autowired
 	private ChainPriceOpenDao chainPriceOpenDao;
 
 	public JSONArray findChainAll() {
@@ -51,6 +62,30 @@ public class ChainService {
 		cpoList.stream().forEach(cpo -> {
 			PriceCache.priceMapOpen.put(cpo.getChainkey(), cpo.getPrice());
 		});
+	}
+
+	@Transactional(readOnly = false)
+	public void saveUnitPrice() {
+
+		List<UsdtPrice> upList = (List<UsdtPrice>) usdtPriceDao.findAll();
+		Map<String, Double> baseRmpPriceMap = new HashMap<String, Double>();
+		upList.forEach(up -> {
+			baseRmpPriceMap.put(up.getMarket().toLowerCase() + "_usdt", up.getPriceRmb());
+			PriceCache.priceMapUnitRmb.put(up.getMarket().toLowerCase() + "_usdt", up.getPriceRmb());
+		});
+
+		List<ChainUnitPrice> cupList = (List<ChainUnitPrice>) chainUnitPriceDao.findAll();
+		cupList.forEach(up -> {
+			String key = (up.getMarket() + "_" + up.getUnit() + "usdt").toLowerCase();
+			JSONObject priceJson = PriceCache.priceMap.get(key);
+			if (priceJson != null) {
+				Double priceUsdtRmb = baseRmpPriceMap.get(up.getMarket().toLowerCase() + "_usdt");
+				Double priceRmb = priceJson.getDouble("close") * priceUsdtRmb;
+				up.setPriceRmb(priceRmb);
+				PriceCache.priceMapUnitRmb.put(up.getMarket().toLowerCase() + "_" + up.getUnit(), priceRmb);
+			}
+		});
+		chainUnitPriceDao.save(cupList);
 	}
 
 	@Transactional(readOnly = false)

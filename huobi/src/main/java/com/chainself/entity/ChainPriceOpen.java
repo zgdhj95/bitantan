@@ -20,6 +20,7 @@ public class ChainPriceOpen {
 	private Long id;
 	private String chainkey;// 参数代码
 	private String price;
+	private String priceRmb;
 
 	public Long getId() {
 		return id;
@@ -43,6 +44,14 @@ public class ChainPriceOpen {
 
 	public void setPrice(String price) {
 		this.price = price;
+	}
+
+	public String getPriceRmb() {
+		return priceRmb;
+	}
+
+	public void setPriceRmb(String priceRmb) {
+		this.priceRmb = priceRmb;
 	}
 
 }

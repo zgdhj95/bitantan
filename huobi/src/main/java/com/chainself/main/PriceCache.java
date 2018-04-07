@@ -14,6 +14,7 @@ public class PriceCache {
 
 	private static DateFormat datesf = new SimpleDateFormat("yyyy-MM-dd");
 	public static ConcurrentHashMap<String, JSONObject> priceMap = new ConcurrentHashMap<String, JSONObject>();
+	public static ConcurrentHashMap<String, Double> priceMapUnitRmb = new ConcurrentHashMap<String, Double>();
 	public static ConcurrentHashMap<String, String> priceMapOpen = new ConcurrentHashMap<String, String>();
 
 	public static java.util.Date parseDateTime(String paramString) {
@@ -28,6 +29,22 @@ public class PriceCache {
 			System.out.println("parseDateTime error " + paramString);
 		}
 		return null;
+	}
+
+	private static final String[] ALL_UNIT = new String[] { ".*usdt", ".*btc", ".*eth", ".*bnb", ".*ht", ".*okb" };
+
+	public static void main2(String[] args) {
+		String key = "huobi_btcusdt";
+		for (int i = 0; i < ALL_UNIT.length; i++) {
+			String unitLike = ALL_UNIT[i];
+			if (key.matches(unitLike)) {
+				String[] keys = key.split("_");
+				String unitRmbPriceKey = keys[0] + unitLike.replace(".*", "_");
+				System.out.println(unitRmbPriceKey);
+			}
+		}
+
+		System.out.println(String.format("%.2f", 0.329121211d));
 	}
 
 	public static JSONObject getPrice(String market, String chain, String unit) {
@@ -48,8 +65,28 @@ public class PriceCache {
 			JSONObject jsonValue = (JSONObject) jsonItem.getValue();
 			priceMap.put(key, jsonValue);
 		}
+
 		long time1 = System.currentTimeMillis();
 		System.out.println("initMap success,size=" + priceMap.size() + " time=" + (time1 - time0));
+		ChainServer.chainService.saveUnitPrice();
+
+		priceMap.entrySet().forEach(pme -> {
+			String key = pme.getKey();
+			JSONObject value = pme.getValue();
+			for (int i = 0; i < ALL_UNIT.length; i++) {
+				String unitLike = ALL_UNIT[i];
+				if (key.matches(unitLike)) {
+					String[] keys = key.split("_");
+					String unitRmbPriceKey = keys[0] + unitLike.replace(".*", "_");
+					if (priceMapUnitRmb.containsKey(unitRmbPriceKey)) {
+						Double unitPriceRmb = priceMapUnitRmb.get(unitRmbPriceKey);
+						Double closePrice = value.getDouble("close");
+						value.put("closeRmb", unitPriceRmb * closePrice);
+					}
+				}
+			}
+
+		});
 
 		if (isDayOpen) {
 			ChainServer.chainService.saveDayOpenPrice();
