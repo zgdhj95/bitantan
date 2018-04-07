@@ -182,7 +182,7 @@ public class ChainServer {
 					result.put("marketName", uc.getMarket());
 					result.put("price", clearZero(price.getString("close")));
 					result.put("unitStr", getUnitStr(uc.getPriceUnit().toLowerCase()));
-					Double closeRmb = price.getDouble("priceRmb");
+					Double closeRmb = price.getDouble("closeRmb");
 					result.put("priceRmb", String.format("%.2f", closeRmb));
 					result.put("marketTitle", uc.getMarket());
 					if (close < open) {
