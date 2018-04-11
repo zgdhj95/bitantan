@@ -1,77 +1,74 @@
 <template>
-  <div class="self-body__container">
-    <ul>
-      <li class="self-item__container" v-for="(coin, index) in coinList">
-        <div class="item-left">
-          <div class="market">
-            <img class="market-icon" :src="coin.icon"/>
+  <div class="self__container">
+    <div class="self-header__container">
+      <input type="text" placeholder="请输入要添加的币种名称" :style="textAlign" class="search-input" @focus="focusSearch" @blur="blurFocus"/>
+      <div class="delete-coin">
+        <img src="https://static.weixiaotong.com.cn/ico_delete.svg" />
+      </div>
+    </div>
+    <div class="self-body__container" v-show="!onSearchFocus">
+      <ul v-show="!onSearchFocus">
+        <li class="self-item__container" v-for="(coin, index) in coinList">
+          <div class="item-left">
+            <div class="market">
+              <img class="market-icon" :src="coin.icon"/>
+            </div>
+            <div class="coin-name-unit">
+              <span class="coin-name"> {{coin.coinName}}/{{coin.coinUnit}}
+              </span>
+              <span class="coin-unit">{{coin.marketTitle}}</span>
+            </div>
           </div>
-          <div class="coin-name-unit">
-            <span class="coin-name"> {{coin.coinName}}/{{coin.coinUnit}}
-            </span>
-            <span class="coin-unit">{{coin.marketTitle}}</span>
+          <div class="coin-price">
+            <span :class="'coin-price-rmb' + ' ' + coin.result">￥{{coin.priceRmb}}</span>
+            <span class="coin-price-real">{{coin.unitStr}}{{coin.price}}</span>
           </div>
-        </div>
-        <div class="coin-price">
-          <span :class="'coin-price-rmb' + ' ' + coin.result">￥{{coin.priceRmb}}</span>
-          <span class="coin-price-real">{{coin.unitStr}}{{coin.price}}</span>
-        </div>
-        <div :class="'coin-pricerate' + ' ' + ' rate' + coin.result">
-          <span >{{coin.priceRate}}</span>
-        </div>
-      </li>
-    </ul>
+          <div :class="'coin-pricerate' + ' ' + ' rate' + coin.result">
+            <span >{{coin.priceRate}}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
-
 <script>
 // import axios from 'axios'
 import store from '../index/store'
 export default {
   data () {
     return {
-      showRmb: true,
-      coinList: []
+      onSearchFocus: false,
+      textAlign: 'text-align: center;'
+    }
+  },
+  computed: {
+    coinList () {
+      return store.state.coinList
     }
   },
   methods: {
-    calcRmbPrice (coin) {
-      let rmbPrice = 0
-      if (coin.coinUnit === 'USDT') {
-        rmbPrice = 6.4 * coin.price
-      } else if (coin.coinUnit === 'BTC') {
-        rmbPrice = 6.4 * 6865 * coin.price
-      }
-      console.log(' rmb price ==' + rmbPrice)
-      return rmbPrice
+    blurFocus () {
+      this.onSearchFocus = false
+      this.textAlign = 'text-align: center;'
     },
-    queryData () {
-      console.log('user is', store.state.userInfo)
-      var that = this
-      wx.request({
-        url: 'https://www.coinexplorer.cn/querychainlist',
-        method: 'GET',
-        header: {
-          'Content-Type': 'json'
-        },
-        success: function (res) {
-          console.log(res.data)
-          that.coinList = res.data
-        }
-      })
+    focusSearch () {
+      console.log('search focus')
+      this.onSearchFocus = true
+      this.textAlign = 'text-align: left;'
     }
   },
   created () {
-    this.queryData()
-    let self = this
-    setInterval(() => {
-      self.queryData()
-    }, 5000)
   }
 }
 </script>
 
 <style scoped>
+
+  .self__container {
+    display: flex;
+    flex-direction: column;
+  }
+
   .self-body__container {
     display: flex;
     flex-direction: column;
@@ -178,5 +175,55 @@ export default {
 
   .self-item__container:last-child {
     border:none
+  }
+
+  .search-input {
+      width: calc( 100% - 50px);
+      border: 1rpx solid #384457;
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-size: 14px;
+      color: white;
+  }
+
+  .self-header__container {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1rpx solid #21232A;
+    justify-content: space-between;
+  }
+
+  .delete-coin img {
+    width: 22px;
+    height: 32px;
+  }
+
+  .self-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1D3F59;
+  }
+
+  .delete-coin {
+    display: flex;
+    justify-content: center;
+    width: 30px;
+  }
+
+  .rmb-on-text {
+    font-size: 16px;
+    color: #1D3F59;
+    margin-left: 5px;
+  }
+
+  .rmb-off-text {
+    font-size: 16px;
+    color: #C6CFD6;
+    margin-left: 5px;
+  }
+
+  .switchicon {
+    width: 36px;
+    height: 18px;
   }
 </style>

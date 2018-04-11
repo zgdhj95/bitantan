@@ -7,12 +7,19 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    userInfo: {}
+    userInfo: {},
+    openid: '',
+    coinList: []
   },
   mutations: {
+    saveCoinList: (state, coinList) => {
+      state.coinList = coinList
+    },
     saveUser: (state, userInfo) => {
-      const obj = state
-      obj.userInfo = userInfo
+      state.userInfo = userInfo
+    },
+    saveOpenid: (state, openid) => {
+      state.openid = openid
     }
   }
 })

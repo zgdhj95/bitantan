@@ -1,9 +1,6 @@
 <template>
   <div class="container">
 
-    <self-header>
-    </self-header>
-
     <self-body>
     </self-body>
 

@@ -1,6 +1,6 @@
 <template>
   <div class="self-header__container">
-    <input type="text" placeholder="请输入要添加的币种名称" class="search-input" @focus="focusSearch"/>
+    <input type="text" placeholder="请输入要添加的币种名称" :style="textAlign" class="search-input" @focus="focusSearch"/>
     <div class="delete-coin">
       <img src="https://static.weixiaotong.com.cn/ico_delete.svg" />
     </div>
@@ -19,14 +19,14 @@
 export default {
   data () {
     return {
-      showRmb: true
+      showRmb: true,
+      textAlign: 'text-align: center;'
     }
   },
   methods: {
     focusSearch () {
       console.log('search focus')
-      const url = '../search/search'
-      wx.navigateTo({ url })
+      this.textAlign = 'text-align: left;'
     }
   },
   created () {
@@ -43,7 +43,7 @@ export default {
       border-radius: 4px;
       padding: 3px 5px;
       font-size: 14px;
-      text-align: center;
+      color: white;
   }
 
   .self-header__container {
