@@ -165,6 +165,7 @@ public class ChainServer {
 		get("/querychainlist", (req, res) -> {
 
 			List<JSONObject> coinList = new ArrayList<JSONObject>();
+			System.out.println("openid=" + req.params("openid"));
 
 			ChainServer.chainService.findUserChainAll().stream().forEach(uc -> {
 				JSONObject price = PriceCache.getPrice(uc.getMarket(), uc.getChain(), uc.getPriceUnit());
