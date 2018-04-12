@@ -22,7 +22,9 @@ import static spark.Spark.threadPool;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 
 import org.springframework.context.ApplicationContext;
@@ -31,6 +33,7 @@ import org.springframework.core.env.AbstractEnvironment;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.chainself.entity.Chain;
 import com.chainself.service.ChainService;
 import com.chainself.timer.QueryTimer;
 import com.chainself.util.CorsFilter;
@@ -62,6 +65,20 @@ public class ChainServer {
 		startTimer();
 		startSparkHttpServer();
 
+	}
+
+	public static Map<String, Chain> chainMap = new HashMap<String, Chain>();
+	public static Map<String, String> marketNameMap = new HashMap<String, String>();
+
+	public static void initChainMap() {
+		chainMap = ChainServer.chainService.getChainMap();
+	}
+
+	public static void initMarketNameMap() {
+		marketNameMap.put("huobi", "火币");
+		marketNameMap.put("binance", "币安");
+		marketNameMap.put("okex", "OKEX");
+		marketNameMap.put("zb", "中币");
 	}
 
 	/**
@@ -113,6 +130,20 @@ public class ChainServer {
 		}
 	}
 
+	public static Map<String, String> userMap = new HashMap<String, String>();
+
+	public static boolean isOpenidExists(String openid) {
+		if (userMap.containsKey(openid)) {
+			return true;
+		} else {
+			boolean result = chainService.isUserExists(openid);
+			if (result) {
+				userMap.put(openid, openid);
+			}
+			return result;
+		}
+	}
+
 	public static void startSparkHttpServer() throws Exception {
 
 		int maxThreads = 10;
@@ -157,17 +188,58 @@ public class ChainServer {
 			return result;
 		});
 
+		get("/searchchain", (req, res) -> {
+			System.out.println("openid=" + req.queryParams("openid"));
+			String openid = req.queryParams("openid");
+			if (!isOpenidExists(openid)) {
+				throw new RuntimeException("非法访问");
+			}
+			String code = req.queryParams("chain");
+			return ChainServer.chainService.searchChain(code, openid);
+		});
+
 		get("/asset", (req, res) -> {
 			String userid = req.queryParams("userid");
 			return ChainServer.chainService.calcUserAsset(userid);
+		});
+
+		get("/selectchain", (req, res) -> {
+			String chain = req.queryParams("chain");
+			String market = req.queryParams("market");
+			String unit = req.queryParams("unit");
+			String openid = req.queryParams("openid");
+			System.out.println("openid=" + req.queryParams("openid"));
+			if (!isOpenidExists(openid)) {
+				throw new RuntimeException("非法访问");
+			}
+			ChainServer.chainService.selectChain(openid, market, chain, unit);
+			return "success";
+		});
+
+		get("/unselectchain", (req, res) -> {
+			String chain = req.queryParams("chain");
+			String market = req.queryParams("market");
+			String unit = req.queryParams("unit");
+			String openid = req.queryParams("openid");
+			System.out.println("openid=" + req.queryParams("openid"));
+			if (!isOpenidExists(openid)) {
+				throw new RuntimeException("非法访问");
+			}
+			ChainServer.chainService.unSelectChain(openid, market, chain, unit);
+			return "success";
 		});
 
 		get("/querychainlist", (req, res) -> {
 
 			List<JSONObject> coinList = new ArrayList<JSONObject>();
 			System.out.println("openid=" + req.queryParams("openid"));
+			String openid = req.queryParams("openid");
+			if (!isOpenidExists(openid)) {
+				throw new RuntimeException("非法访问");
+			}
 
-			ChainServer.chainService.findUserChainAll().stream().forEach(uc -> {
+			ChainServer.chainService.findUserChainAll(openid).stream().forEach(uc -> {
+
 				JSONObject price = PriceCache.getPrice(uc.getMarket(), uc.getChain(), uc.getPriceUnit());
 				if (price != null) {
 					String priceJson = price.toJSONString();
@@ -190,10 +262,11 @@ public class ChainServer {
 					}
 					String rateStr = df.format(rate) + "%";
 					result.put("priceRate", rateStr);
-					result.put("icon", uc.getIcon());
+					Chain chain = ChainServer.chainMap.get(uc.getChain());
+					result.put("icon", chain.getIcon());
 					result.put("coinUnit", uc.getPriceUnit().toUpperCase());
 					result.put("coinUnitStr", uc.getPriceUnit().toUpperCase());
-					result.put("coinName", uc.getChain());
+					result.put("coinName", uc.getChain().toUpperCase());
 					result.put("marketName", uc.getMarket());
 					result.put("price", clearZero(price.getString("close")));
 					result.put("unitStr", getUnitStr(uc.getPriceUnit().toLowerCase()));

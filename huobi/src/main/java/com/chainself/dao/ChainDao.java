@@ -2,8 +2,7 @@ package com.chainself.dao;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.chainself.entity.UsdtPrice;
+import com.chainself.entity.Chain;
 
-public interface ChainDao extends CrudRepository<UsdtPrice, Long> {
-
+public interface ChainDao extends CrudRepository<Chain, String> {
 }

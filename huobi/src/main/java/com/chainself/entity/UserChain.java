@@ -10,10 +10,9 @@ public class UserChain {
 	@Id
 	private Long id;
 	private String chain;// 参数代码
-	private String icon;// 参数名称
-	private String name;// 中文名称
+	private String priceUnit;// 参数名称
 	private String market;// 中文名称
-	private String priceUnit;
+	private String openid;//
 
 	public Long getId() {
 		return id;
@@ -31,20 +30,12 @@ public class UserChain {
 		this.chain = chain;
 	}
 
-	public String getIcon() {
-		return icon;
+	public String getPriceUnit() {
+		return priceUnit;
 	}
 
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setPriceUnit(String priceUnit) {
+		this.priceUnit = priceUnit;
 	}
 
 	public String getMarket() {
@@ -55,12 +46,12 @@ public class UserChain {
 		this.market = market;
 	}
 
-	public String getPriceUnit() {
-		return priceUnit;
+	public String getOpenid() {
+		return openid;
 	}
 
-	public void setPriceUnit(String priceUnit) {
-		this.priceUnit = priceUnit;
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 
 }

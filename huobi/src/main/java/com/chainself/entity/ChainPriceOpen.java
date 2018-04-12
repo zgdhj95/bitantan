@@ -21,6 +21,9 @@ public class ChainPriceOpen {
 	private String chainkey;// 参数代码
 	private String price;
 	private String priceRmb;
+	private String chain;
+	private String unit;
+	private String market;
 
 	public Long getId() {
 		return id;
@@ -52,6 +55,30 @@ public class ChainPriceOpen {
 
 	public void setPriceRmb(String priceRmb) {
 		this.priceRmb = priceRmb;
+	}
+
+	public String getChain() {
+		return chain;
+	}
+
+	public void setChain(String chain) {
+		this.chain = chain;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
+	public String getMarket() {
+		return market;
+	}
+
+	public void setMarket(String market) {
+		this.market = market;
 	}
 
 }

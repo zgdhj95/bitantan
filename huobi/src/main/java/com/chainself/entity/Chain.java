@@ -8,18 +8,9 @@ import javax.persistence.Table;
 @Table(name = "chain")
 public class Chain {
 	@Id
-	private Long id;
 	private String chain;// 参数代码
 	private String icon;// 参数名称
 	private String name;// 中文名称
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getChain() {
 		return chain;

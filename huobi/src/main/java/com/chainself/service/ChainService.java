@@ -21,12 +21,14 @@ import com.chainself.dao.UsdtPriceDao;
 import com.chainself.dao.UserAssetDao;
 import com.chainself.dao.UserChainDao;
 import com.chainself.dao.UserDao;
+import com.chainself.entity.Chain;
 import com.chainself.entity.ChainPriceOpen;
 import com.chainself.entity.ChainUnitPrice;
 import com.chainself.entity.UsdtPrice;
 import com.chainself.entity.User;
 import com.chainself.entity.UserAsset;
 import com.chainself.entity.UserChain;
+import com.chainself.main.ChainServer;
 import com.chainself.main.PriceCache;
 import com.chainself.util.ConstantVar;
 
@@ -58,12 +60,16 @@ public class ChainService {
 	@Autowired
 	private UserDao userDao;
 
+	public boolean isUserExists(String openid) {
+		return !userDao.findByOpenid(openid).isEmpty();
+	}
+
 	public JSONArray findChainAll() {
 		return (JSONArray) JSON.toJSON(chainDao.findAll());
 	}
 
-	public List<UserChain> findUserChainAll() {
-		return (List<UserChain>) userChainDao.findAll();
+	public List<UserChain> findUserChainAll(String openid) {
+		return (List<UserChain>) userChainDao.findByOpenid(openid);
 	}
 
 	public void initPriceMapOpen() {
@@ -71,6 +77,15 @@ public class ChainService {
 		cpoList.stream().forEach(cpo -> {
 			PriceCache.priceMapOpen.put(cpo.getChainkey(), cpo.getPrice());
 		});
+	}
+
+	public Map<String, Chain> getChainMap() {
+		List<Chain> chainList = (List<Chain>) chainDao.findAll();
+		Map<String, Chain> result = new HashMap<String, Chain>();
+		chainList.forEach(chain -> {
+			result.put(chain.getChain(), chain);
+		});
+		return result;
 	}
 
 	@Transactional(readOnly = false)
@@ -97,6 +112,53 @@ public class ChainService {
 		chainUnitPriceDao.save(cupList);
 	}
 
+	public static void main(String[] args) {
+		String chainUnit = "trxusdt";
+		System.out.println(chainUnit.substring(chainUnit.length() - 3, chainUnit.length()));
+		System.out.println(chainUnit.substring(0, chainUnit.length() - 4));
+	}
+
+	private boolean isUsdt(String chainUnit) {
+		return "usdt".equals(chainUnit.substring(chainUnit.length() - 4, chainUnit.length()));
+	}
+
+	private boolean isEth(String chainUnit) {
+		return "eth".equals(chainUnit.substring(chainUnit.length() - 3, chainUnit.length()));
+	}
+
+	private boolean isBtc(String chainUnit) {
+		return "btc".equals(chainUnit.substring(chainUnit.length() - 3, chainUnit.length()));
+	}
+
+	private boolean isBnb(String chainUnit) {
+		return "bnb".equals(chainUnit.substring(chainUnit.length() - 3, chainUnit.length()));
+	}
+
+	private String getChainName(String chainUnit, int inx) {
+		return chainUnit.substring(0, chainUnit.length() - inx);
+	}
+
+	@Transactional(readOnly = false)
+	public void selectChain(String openid, String market, String chain, String unit) {
+		UserChain uc = userChainDao.findByMcu(market, chain, unit, openid);
+		if (uc == null) {
+			uc = new UserChain();
+			uc.setChain(chain);
+			uc.setMarket(market);
+			uc.setPriceUnit(unit);
+			uc.setOpenid(openid);
+			userChainDao.save(uc);
+		}
+	}
+
+	@Transactional(readOnly = false)
+	public void unSelectChain(String openid, String market, String chain, String unit) {
+		UserChain uc = userChainDao.findByMcu(market, chain, unit, openid);
+		if (uc != null) {
+			userChainDao.delete(uc);
+		}
+	}
+
 	@Transactional(readOnly = false)
 	public void saveDayOpenPrice() {
 		Map<String, List<ChainPriceOpen>> mapCpo = ((List<ChainPriceOpen>) chainPriceOpenDao.findAll()).stream()
@@ -104,12 +166,28 @@ public class ChainService {
 		List<ChainPriceOpen> savedList = new ArrayList<ChainPriceOpen>();
 
 		for (Entry<String, JSONObject> entry : PriceCache.priceMap.entrySet()) {
-			String key = entry.getKey();
+			String key = entry.getKey().toLowerCase();
 			List<ChainPriceOpen> cpoList = mapCpo.get(key);
 			if (cpoList == null) {
 				ChainPriceOpen newCpo = new ChainPriceOpen();
 				newCpo.setChainkey(key);
 				newCpo.setPrice(entry.getValue().getString("close"));
+				String[] marketChainstr = key.split("_");
+				newCpo.setMarket(marketChainstr[0]);
+				String chainUnit = marketChainstr[1];
+				if (isUsdt(chainUnit)) {
+					newCpo.setChain(getChainName(chainUnit, 4));
+					newCpo.setUnit("usdt");
+				} else {
+					newCpo.setChain(getChainName(chainUnit, 3));
+					if (isBtc(chainUnit)) {
+						newCpo.setUnit("btc");
+					} else if (isBnb(chainUnit)) {
+						newCpo.setUnit("bnb");
+					} else if (isEth(chainUnit)) {
+						newCpo.setUnit("eth");
+					}
+				}
 				savedList.add(newCpo);
 			} else {
 				ChainPriceOpen editCpo = cpoList.get(0);
@@ -146,6 +224,27 @@ public class ChainService {
 			System.out.println("query asset error userid=" + userid + " error=" + e.getMessage());
 			return 0d;
 		}
+	}
+
+	public List<JSONObject> searchChain(String code, String openid) {
+		Map<String, List<UserChain>> ucMap = userChainDao.findByOpenid(openid).stream()
+				.collect(Collectors.groupingBy(uc -> {
+					return (uc.getMarket() + "_" + uc.getChain() + uc.getPriceUnit()).toLowerCase();
+				}));
+		List<ChainPriceOpen> copList = chainPriceOpenDao.findByChain(code);
+		return copList.stream().map(cpo -> {
+			JSONObject json = new JSONObject();
+			json.put("coinName", cpo.getChain());
+			json.put("coinUnit", cpo.getUnit());
+			json.put("marketTitle", ChainServer.marketNameMap.get(cpo.getMarket()));
+			Chain chain = ChainServer.chainMap.get(cpo.getChain());
+			if (chain != null) {
+				json.put("icon", chain.getIcon());
+			}
+			String key = cpo.getMarket() + "_" + cpo.getChain() + cpo.getUnit();
+			json.put("selected", ucMap.containsKey(key));
+			return json;
+		}).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = false)

@@ -3,6 +3,7 @@ package com.chainself.timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chainself.main.ChainServer;
 import com.chainself.main.PriceCache;
 
 import io.itit.itf.okhttp.FastHttpClient;
@@ -27,6 +28,13 @@ public class QueryTimer extends java.util.TimerTask {
 				try {
 					String responseStr = response.body().string();
 					PriceCache.initMap(responseStr);
+
+					int i = 0;
+					if (i % 600 == 0) {
+						ChainServer.initChainMap();
+						i = 0;
+					}
+					i++;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
