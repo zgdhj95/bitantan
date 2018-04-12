@@ -1,6 +1,8 @@
 package com.chainself.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -8,6 +10,7 @@ import javax.persistence.Table;
 @Table(name = "user_chain")
 public class UserChain {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String chain;// 参数代码
 	private String priceUnit;// 参数名称
