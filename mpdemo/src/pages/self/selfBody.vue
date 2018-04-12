@@ -39,7 +39,7 @@
             <div class="coin-name-unit">
               <span class="coin-name"> {{coin.coinName}}/{{coin.coinUnit}}
               </span>
-              <span class="coin-unit">{{coin.marketTitle}}</span>
+              <span class="coin-unit">{{coin.marketName}}</span>
             </div>
           </div>
           <div class="coin-price">
