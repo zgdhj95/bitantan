@@ -234,8 +234,8 @@ public class ChainService {
 		List<ChainPriceOpen> copList = chainPriceOpenDao.findByChain(code);
 		return copList.stream().map(cpo -> {
 			JSONObject json = new JSONObject();
-			json.put("coinName", cpo.getChain());
-			json.put("coinUnit", cpo.getUnit());
+			json.put("coinName", cpo.getChain().toUpperCase());
+			json.put("coinUnit", cpo.getUnit().toUpperCase());
 			json.put("marketTitle", ChainServer.marketNameMap.get(cpo.getMarket()));
 			Chain chain = ChainServer.chainMap.get(cpo.getChain());
 			if (chain != null) {

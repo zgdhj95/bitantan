@@ -60,6 +60,7 @@ public class ChainServer {
 		System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "production");
 		context = new ClassPathXmlApplicationContext("applicationContext.xml");
 		chainService = (ChainService) ChainServer.getService("chainService");
+		initMarketNameMap();
 		chainService.initPriceMapOpen();
 		FastHttpClient.okHttpClient.dispatcher().setMaxRequestsPerHost(10);
 		startTimer();
