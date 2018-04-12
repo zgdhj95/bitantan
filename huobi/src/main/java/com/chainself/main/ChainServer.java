@@ -279,6 +279,7 @@ public class ChainServer {
 					result.put("coinUnit", uc.getPriceUnit().toUpperCase());
 					result.put("coinUnitStr", uc.getPriceUnit().toUpperCase());
 					result.put("coinName", uc.getChain().toUpperCase());
+					result.put("market", marketNameMap.get(uc.getMarket()));
 					result.put("marketName", uc.getMarket());
 					result.put("price", clearZero(price.getString("close")));
 					result.put("unitStr", getUnitStr(uc.getPriceUnit().toLowerCase()));
