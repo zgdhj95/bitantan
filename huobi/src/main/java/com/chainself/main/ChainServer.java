@@ -225,9 +225,9 @@ public class ChainServer {
 
 		get("/unselectchain", (req, res) -> {
 			try {
-				String chain = req.queryParams("chain");
-				String market = req.queryParams("market");
-				String unit = req.queryParams("unit");
+				String chain = req.queryParams("chain").toLowerCase();
+				String market = req.queryParams("market").toLowerCase();
+				String unit = req.queryParams("unit").toLowerCase();
 				String openid = req.queryParams("openid");
 				System.out.println("openid=" + req.queryParams("openid"));
 				if (!isOpenidExists(openid)) {
