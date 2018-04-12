@@ -205,29 +205,40 @@ public class ChainServer {
 		});
 
 		get("/selectchain", (req, res) -> {
-			String chain = req.queryParams("chain").toLowerCase();
-			String market = req.queryParams("market").toLowerCase();
-			String unit = req.queryParams("unit").toLowerCase();
-			String openid = req.queryParams("openid");
-			System.out.println("openid=" + req.queryParams("openid"));
-			if (!isOpenidExists(openid)) {
-				throw new RuntimeException("非法访问");
+			try {
+				String chain = req.queryParams("chain").toLowerCase();
+				String market = req.queryParams("market").toLowerCase();
+				String unit = req.queryParams("unit").toLowerCase();
+				String openid = req.queryParams("openid");
+				System.out.println("openid=" + req.queryParams("openid"));
+				if (!isOpenidExists(openid)) {
+					throw new RuntimeException("非法访问");
+				}
+
+				ChainServer.chainService.selectChain(openid, market, chain, unit);
+				return "success";
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "error";
 			}
-			ChainServer.chainService.selectChain(openid, market, chain, unit);
-			return "success";
 		});
 
 		get("/unselectchain", (req, res) -> {
-			String chain = req.queryParams("chain");
-			String market = req.queryParams("market");
-			String unit = req.queryParams("unit");
-			String openid = req.queryParams("openid");
-			System.out.println("openid=" + req.queryParams("openid"));
-			if (!isOpenidExists(openid)) {
-				throw new RuntimeException("非法访问");
+			try {
+				String chain = req.queryParams("chain");
+				String market = req.queryParams("market");
+				String unit = req.queryParams("unit");
+				String openid = req.queryParams("openid");
+				System.out.println("openid=" + req.queryParams("openid"));
+				if (!isOpenidExists(openid)) {
+					throw new RuntimeException("非法访问");
+				}
+				ChainServer.chainService.unSelectChain(openid, market, chain, unit);
+				return "success";
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "error";
 			}
-			ChainServer.chainService.unSelectChain(openid, market, chain, unit);
-			return "success";
 		});
 
 		get("/querychainlist", (req, res) -> {
