@@ -236,6 +236,7 @@ public class ChainService {
 			JSONObject json = new JSONObject();
 			json.put("coinName", cpo.getChain().toUpperCase());
 			json.put("coinUnit", cpo.getUnit().toUpperCase());
+			json.put("market", cpo.getMarket());
 			json.put("marketTitle", ChainServer.marketNameMap.get(cpo.getMarket()));
 			Chain chain = ChainServer.chainMap.get(cpo.getChain());
 			if (chain != null) {
