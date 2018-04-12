@@ -261,7 +261,7 @@ export default {
 
   .search-item-left {
     display: flex;
-    width: 150px;
+    width: 240px;
     font-size: 14px;
     padding-left: 10px;
   }
