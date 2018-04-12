@@ -3,12 +3,14 @@
     <div class="self-header__container">
       <input type="text" placeholder="请输入要添加的币种名称" v-model="searchText" :style="textAlign" class="search-input" @focus="focusSearch" @blur="blurFocus"/>
       <div class="delete-coin">
-        <img src="https://static.weixiaotong.com.cn/ico_delete.svg" />
+        <img v-show="!onSearchFocus && !onDeleteIco" src="https://static.weixiaotong.com.cn/ico_delete.svg" @click="startDelete"/>
+        <img v-show="onSearchFocus" @click="closeSearch" src="http://sqxystatic.weixiaotong.com.cn/ico-search-close.svg" />
+        <img v-show="onDeleteIco" @click="closeDelete" src="http://sqxystatic.weixiaotong.com.cn/ico-search-close.svg" />
       </div>
     </div>
     <div class="search-chain__container" v-show="onSearchFocus">
       <ul v-show="onSearchFocus">
-        <li class="search-item__container" v-for="(coin, index) in searchList">
+        <li class="search-item__container" v-for="(coin, index) in searchList" :key="index">
           <div class="search-item-left">
             <div class="search-chain__icon">
               <img class="market-icon" :src="coin.icon"/>
@@ -22,14 +24,14 @@
           </div>
           <div class="search-item-right">
             <span class="search-selected" v-show="coin.selected">已添加</span>
-            <img class="search-unselected" src="http://sqxystatic.weixiaotong.com.cn/cc-plus-square.png" v-show="!coin.selected"></img>
+            <img class="search-unselected" src="http://sqxystatic.weixiaotong.com.cn/cc-plus-square.png" v-show="!coin.selected" @click="selectChain(coin)"></img>
           </div>
         </li>
       </ul>
     </div>
     <div class="self-body__container" v-show="!onSearchFocus">
       <ul v-show="!onSearchFocus">
-        <li class="self-item__container" v-for="(coin, index) in coinList">
+        <li class="self-item__container" v-for="(coin, index) in coinList" :key="index">
           <div class="item-left">
             <div class="market">
               <img class="market-icon" :src="coin.icon"/>
@@ -44,8 +46,11 @@
             <span :class="'coin-price-rmb' + ' ' + coin.result">￥{{coin.priceRmb}}</span>
             <span class="coin-price-real">{{coin.unitStr}}{{coin.price}}</span>
           </div>
-          <div :class="'coin-pricerate' + ' ' + ' rate' + coin.result">
+          <div v-show="!onDeleteIco" :class="'coin-pricerate' + ' ' + ' rate' + coin.result">
             <span >{{coin.priceRate}}</span>
+          </div>
+          <div v-show="onDeleteIco" class="coin-btn-delete" @click="deleteIco(coin, index)">
+            <span >删除</span>
           </div>
         </li>
       </ul>
@@ -60,11 +65,9 @@ export default {
     return {
       searchText: '',
       onSearchFocus: false,
+      onDeleteIco: false,
       textAlign: 'text-align: center;',
       searchList: [
-        {coinName: 'GNX', coinUnit: 'BTC', marketTitle: 'huobi', icon: 'https://static.feixiaohao.com/coin/9ee8ca52bc8b2185ec62d15a57dd336_mid.png', selected: true},
-        {coinName: 'ETH', coinUnit: 'BTC', marketTitle: '币安', icon: 'https://static.feixiaohao.com/coin/20171221/cfc2e32f4ddd4ad8be3057eedc0ec758_2.png', selected: false},
-        {coinName: 'ETH', coinUnit: 'USDT', marketTitle: 'huobi', icon: 'https://static.feixiaohao.com/coin/20170819/63639ab8b44143fcbcfc96a1cb9b1bfd_2.png', selected: false}
       ]
     }
   },
@@ -74,6 +77,52 @@ export default {
     }
   },
   methods: {
+    startDelete () {
+      this.onDeleteIco = true
+    },
+    closeDelete () {
+      this.onDeleteIco = false
+    },
+    closeSearch () {
+      this.onSearchFocus = false
+      this.searchText = ''
+      this.textAlign = 'text-align: center;'
+    },
+    deleteIco (coin, index) {
+      console.log(' coin is ', coin)
+      this.unSelectChain(coin)
+      this.coinList.splice(index, 1)
+    },
+    unSelectChain (coin) {
+      let url = 'https://www.coinexplorer.cn/unselectchain?chain=' + coin.coinName + '&unit=' + coin.coinUnit + '&market=' + coin.market + '&openid=' + store.state.openid
+      console.log('url ', url)
+      coin.selected = true
+      wx.request({
+        url: url,
+        method: 'GET',
+        header: {
+          'Content-Type': 'json'
+        },
+        success: function (res) {
+          console.log(res.data)
+        }
+      })
+    },
+    selectChain (coin) {
+      let url = 'https://www.coinexplorer.cn/selectchain?chain=' + coin.coinName + '&unit=' + coin.coinUnit + '&market=' + coin.market + '&openid=' + store.state.openid
+      console.log('url ', url)
+      coin.selected = true
+      wx.request({
+        url: url,
+        method: 'GET',
+        header: {
+          'Content-Type': 'json'
+        },
+        success: function (res) {
+          console.log(res.data)
+        }
+      })
+    },
     blurFocus () {
       if (this.searchText === '') {
         this.onSearchFocus = false
@@ -91,7 +140,7 @@ export default {
   watch: {
     searchText (newval) {
       const self = this
-      let url = 'https://www.coinexplorer.cn/searchchain?chain=' + newval + 'openid=' + store.state.openid
+      let url = 'https://www.coinexplorer.cn/searchchain?chain=' + this.searchText + '&openid=' + store.state.openid
       console.log('url is', url)
       wx.request({
         url: url,
@@ -161,7 +210,7 @@ export default {
     font-size: 18px;
     font-weight: 700;
     padding-bottom: 5px;
-    width: calc( 100% -  240px);
+    width: calc( 100% -  260px);
     text-align: right;
     display: flex;
     flex-direction: column;
@@ -322,5 +371,15 @@ export default {
     padding-left: 5px;
     font-size: 13px;
     color: #80807a;
+  }
+
+  .coin-btn-delete {
+    border-radius: 2px;
+    padding: 5px 2px;
+    font-size: 14px;
+    color: white;
+    width: 80px;
+    text-align: center;
+    border: 1px solid #546b8e;
   }
 </style>
