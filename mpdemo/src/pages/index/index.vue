@@ -33,7 +33,8 @@ export default {
         },
         success: function (res) {
           console.log(res.data)
-          store.commit('saveCoinList', res.data)
+          store.commit('saveCoinList', res.data.coinList)
+          store.commit('saveAsset', res.data.asset)
         }
       })
     },

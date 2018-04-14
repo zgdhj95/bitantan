@@ -9,7 +9,9 @@ const store = new Vuex.Store({
   state: {
     userInfo: {},
     openid: '',
-    coinList: []
+    coinList: [],
+    assetBtc: 0,
+    assetRmb: 0
   },
   mutations: {
     saveCoinList: (state, coinList) => {
@@ -20,6 +22,11 @@ const store = new Vuex.Store({
     },
     saveOpenid: (state, openid) => {
       state.openid = openid
+    },
+    saveAsset: (state, asset) => {
+      let assets = asset.split('_')
+      state.assetBtc = assets[0]
+      state.assetRmb = assets[1]
     }
   }
 })

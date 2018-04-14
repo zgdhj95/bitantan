@@ -8,6 +8,7 @@
         <img v-show="onDeleteIco" @click="closeDelete" src="http://sqxystatic.weixiaotong.com.cn/ico-search-close.svg" />
       </div>
     </div>
+    <span v-show="!onSearchFocus" class="my-asset">资产：<span  class="my-asset-value">{{assetBtc}} BTC <span class="my-asset-rmb">≈ {{assetRmb}} CNY </span> </span></span>
     <div class="search-chain__container" v-show="onSearchFocus">
       <ul v-show="onSearchFocus">
         <li class="search-item__container" v-for="(coin, index) in searchList" :key="index">
@@ -72,6 +73,12 @@ export default {
     }
   },
   computed: {
+    assetBtc () {
+      return store.state.assetBtc
+    },
+    assetRmb () {
+      return store.state.assetRmb
+    },
     coinList () {
       return store.state.coinList
     }
@@ -345,7 +352,6 @@ export default {
   .search-chain__container {
     display: flex;
     flex-direction: column;
-    padding-top: 15px;
   }
 
   .search-selected {
@@ -381,5 +387,22 @@ export default {
     width: 80px;
     text-align: center;
     border: 1px solid #546b8e;
+  }
+
+  .my-asset {
+    font-size: 16px;
+    color: green;
+    padding: 15px 20px 0px 20px;
+
+  }
+
+  .my-asset-value {
+    font-size: 16px;
+    color: white;
+  }
+
+  .my-asset-rmb {
+    font-size: 16px;
+    color: #999;
   }
 </style>
