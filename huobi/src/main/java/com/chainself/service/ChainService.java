@@ -232,7 +232,7 @@ public class ChainService {
 
 				DecimalFormat dc1 = new DecimalFormat("0.00000");
 				DecimalFormat dc2 = new DecimalFormat("0.00");
-				return dc1.format(btcCount) + "(btc)，" + dc2.format(rmbPrice) + "(元)";
+				return dc1.format(btcCount) + "_" + dc2.format(rmbPrice);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
