@@ -1,5 +1,6 @@
 package com.chainself.service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,6 +117,14 @@ public class ChainService {
 		String chainUnit = "trxusdt";
 		System.out.println(chainUnit.substring(chainUnit.length() - 3, chainUnit.length()));
 		System.out.println(chainUnit.substring(0, chainUnit.length() - 4));
+
+		Double btc = 2.3324234234d;
+
+		DecimalFormat dc1 = new DecimalFormat("0.00000");
+		DecimalFormat dc2 = new DecimalFormat("0.00");
+		System.out.println(dc1.format(btc));
+		System.out.println(dc2.format(btc));
+
 	}
 
 	private boolean isUsdt(String chainUnit) {
@@ -203,13 +212,13 @@ public class ChainService {
 		}
 	}
 
-	public Double calcUserAsset(String userid) {
+	public String calcUserAsset(String userid) {
 		try {
 			List<UserAsset> uaList = userAssetDao.findByUserid(userid);
 			if (uaList.isEmpty()) {
-				return 0d;
+				return "0";
 			} else {
-				return uaList.stream().collect(Collectors.summarizingDouble(ua -> {
+				Double btcCount = uaList.stream().collect(Collectors.summarizingDouble(ua -> {
 					if ("btc".equals(ua.getChain().toLowerCase())) {
 						return ua.getCount();
 					} else {
@@ -218,11 +227,17 @@ public class ChainService {
 						return price * ua.getCount();
 					}
 				})).getSum();
+
+				Double rmbPrice = btcCount * PriceCache.priceMapUnitRmb.get("huobi_btc");
+
+				DecimalFormat dc1 = new DecimalFormat("0.00000");
+				DecimalFormat dc2 = new DecimalFormat("0.00");
+				return dc1.format(btcCount) + "(btc)，" + dc2.format(rmbPrice) + "(元)";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("query asset error userid=" + userid + " error=" + e.getMessage());
-			return 0d;
+			return "0";
 		}
 	}
 
