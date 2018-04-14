@@ -243,6 +243,7 @@ public class ChainServer {
 
 		get("/querychainlist", (req, res) -> {
 
+			JSONObject queryResult = new JSONObject();
 			List<JSONObject> coinList = new ArrayList<JSONObject>();
 			System.out.println("openid=" + req.queryParams("openid"));
 			String openid = req.queryParams("openid");
@@ -294,7 +295,10 @@ public class ChainServer {
 					coinList.add(result);
 				}
 			});
-			return coinList;
+
+			queryResult.put("asset", ChainServer.chainService.calcUserAsset(openid));
+			queryResult.put("coinList", coinList);
+			return queryResult;
 		});
 
 	}
